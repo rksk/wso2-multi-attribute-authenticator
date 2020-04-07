@@ -5,7 +5,7 @@ This component was developed to allow users to use a user attribute (eg: email, 
  
  This component has been tested with WSO2 IS versions from 5.5.0 to 5.9.0.
  
- If you are working with WSO2 IS version 5.8.0 or and older version, please find the documentation [here](README-5.8.0-and-old.MD).
+ If you are working with WSO2 IS version 5.5.0, 5.6.0, 5.7.0 or 5.8.0, please find the documentation [here](README-5.8.0-and-old.MD). The following stpes are for 5.9.0.
 
 ### Steps to deploy
 - Build the component by running "mvn clean install"
