@@ -1,7 +1,7 @@
 # Custom Basic Authenticator for multi-attribute authentication
 
 This component was developed to allow users to use a user attribute (eg: email, phone number) as username when logging in
- with basic authentication instead of the immutable username which [WSO2 Identity Server](https://wso2.com/identity-and-access-management/) has by default.
+ with basic authentication instead of the immutable username which [WSO2 Identity Server](https://wso2.com/identity-and-access-management/) has by default. Read more at [this blog post](https://medium.com/@sajithekanayaka/solved-multiple-login-identifiers-for-wso2-identity-server-78005599d97e).
  
  This component has been tested with WSO2 IS versions from 5.5.0 to 5.9.0.
  
