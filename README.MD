@@ -3,7 +3,7 @@
 This component was developed to allow users to use a user attribute (eg: email, phone number) as username when logging in
  with basic authentication instead of the immutable username which [WSO2 Identity Server](https://wso2.com/identity-and-access-management/) has by default. Read more at [this blog post](https://medium.com/@sajithekanayaka/solved-multiple-login-identifiers-for-wso2-identity-server-78005599d97e).
  
- This component has been tested with WSO2 IS versions from 5.5.0 to 5.9.0.
+ This component has been tested with WSO2 IS versions from 5.5.0 to 5.10.0.
  
  If you are working with WSO2 IS version 5.5.0, 5.6.0, 5.7.0 or 5.8.0, please find the documentation [here](README-5.8.0-and-old.MD). The following stpes are for 5.9.0.
 
@@ -25,12 +25,20 @@ org.wso2.sample.authenticator.multi.attribute-1.0.0.jar
     claimregex_2 = '^\+?(\d{3})*[0-9,\-]{8,}$'
     ```
     
-- If you are going to use email address as as one of the authenticating attributes, add following in deployment.toml
-    ```
-    [tenant_mgt]
-    enable_email_domain = "true"
-    ```
-
+- If you are going to use email address as as one of the authenticating attributes,
+    * Add following in deployment.toml
+        ```
+        [tenant_mgt]
+        enable_email_domain = "true"
+        ```
+    * Add following block inside the `<web-app` tag of <IS_HOME>/repository/deployment/server/webapps/authenticationendpoint/WEB-INF/web.xml (This is not applicable for 5.9.0)
+        ```
+        <context-param>
+            <param-name>EnableEmailUserName</param-name>
+            <param-value>false</param-value>
+        </context-param>
+        ```
+    
 - If you want to use this authenticator for all the service providers
   * update the following properties in the <IS_HOME>/repository/conf/identity/service-providers/default.xml file.
     ```
@@ -38,7 +46,7 @@ org.wso2.sample.authenticator.multi.attribute-1.0.0.jar
         <Name>MultiAttributeAuthenticator</Name>
         <DisplayName>multi-attribute-authenticator</DisplayName>
     ```
-  * Also  update the following variable in <IS_HOME>/repository/deployment/server/webapps/authenticationendpoint/login.jsp
+  * Update the following variable in <IS_HOME>/repository/deployment/server/webapps/authenticationendpoint/login.jsp
     ```
     private static final String BASIC_AUTHENTICATOR = "MultiAttributeAuthenticator";
     ```
@@ -56,7 +64,8 @@ org.wso2.sample.authenticator.multi.attribute-1.0.0.jar
     ```
     localAuthenticatorNames.contains(BASIC_AUTHENTICATOR) || localAuthenticatorNames.contains(MULTI_ATTRIBUTE_AUTHENTICATOR)
     ```
-- To use this authenticator for WSO2 IS user dashboard, update the following properties in 
+- To use this authenticator for WSO2 IS user dashboard (This is only applicable for 5.9.0)
+  * Update the following properties in 
 <IS_HOME>/repository/conf/identity/service-providers/sp_dashboard.xml and restart the Identity Server.
     ```
     <LocalAuthenticatorConfig>

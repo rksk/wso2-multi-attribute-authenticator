@@ -83,6 +83,7 @@ public class MultiAttributeAuthenticatorUtil {
 
     private static String findIdentifier(String identifier) {
 
+        String tenantAwareIdentifier = MultitenantUtils.getTenantAwareUsername(identifier);
         Map<String, String> claimRegexMap = getClaimRegexMap();
         if (claimRegexMap.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -94,7 +95,7 @@ public class MultiAttributeAuthenticatorUtil {
         for(Map.Entry<String, String> entry : claimRegexMap.entrySet()) {
             String claimUri = entry.getKey();
             String regex = entry.getValue();
-            if (isRegexMatching(regex, identifier)){
+            if (isRegexMatching(regex, tenantAwareIdentifier)){
                 return claimUri;
             }
         }
