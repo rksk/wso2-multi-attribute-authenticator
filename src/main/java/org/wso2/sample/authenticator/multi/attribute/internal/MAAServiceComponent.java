@@ -1,12 +1,11 @@
 package org.wso2.sample.authenticator.multi.attribute.internal;
 
-import org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.user.core.service.RealmService;
-
+import org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticator;
 
 /**
  * @scr.component name="org.wso2.sample.authenticator.multi.attribute.component" immediate="true"

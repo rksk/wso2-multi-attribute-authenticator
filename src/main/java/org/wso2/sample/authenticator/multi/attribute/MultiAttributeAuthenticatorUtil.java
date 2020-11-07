@@ -2,7 +2,6 @@ package org.wso2.sample.authenticator.multi.attribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
@@ -25,6 +24,9 @@ import java.util.regex.Pattern;
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_REGEX_PARAM_STARTS_WITH;
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_URI_PARAM_STARTS_WITH;
 
+/**
+ * Utilities used by the MultiAttributeAuthenticator.
+ */
 public class MultiAttributeAuthenticatorUtil {
 
     private static final Log log = LogFactory.getLog(MultiAttributeAuthenticatorUtil.class);
@@ -74,7 +76,7 @@ public class MultiAttributeAuthenticatorUtil {
             return userList[0] + "@" + tenantDomain;
         }
 
-        String errorMessage = "Multiple users found with the same claim("+ claimUri +") value " + claimValue + ": "
+        String errorMessage = "Multiple users found with the same claim(" + claimUri + ") value " + claimValue + ": "
                 + Arrays.toString(userList);
         log.error(errorMessage);
         throw new AuthenticationFailedException(errorMessage);
@@ -92,10 +94,10 @@ public class MultiAttributeAuthenticatorUtil {
             return null;
         }
 
-        for(Map.Entry<String, String> entry : claimRegexMap.entrySet()) {
+        for (Map.Entry<String, String> entry : claimRegexMap.entrySet()) {
             String claimUri = entry.getKey();
             String regex = entry.getValue();
-            if (isRegexMatching(regex, tenantAwareIdentifier)){
+            if (isRegexMatching(regex, tenantAwareIdentifier)) {
                 return claimUri;
             }
         }
@@ -114,7 +116,7 @@ public class MultiAttributeAuthenticatorUtil {
 
         // sort the propery names to keep the regex precedence
         sortedConfig.putAll(authenticatorConfig);
-        for(Map.Entry<String, String> entry : sortedConfig.entrySet()) {
+        for (Map.Entry<String, String> entry : sortedConfig.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
@@ -164,7 +166,8 @@ public class MultiAttributeAuthenticatorUtil {
             }
         } catch (IdentityRuntimeException e) {
             if (log.isDebugEnabled()) {
-                log.debug("MultiAttributeAuthenticatorUtil failed while trying to get the tenant ID of the user " + username, e);
+                log.debug("MultiAttributeAuthenticatorUtil failed while trying to get the tenant ID of the user "
+                        + username, e);
             }
             throw new AuthenticationFailedException(e.getMessage(), User.getUserFromUserName(username), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {

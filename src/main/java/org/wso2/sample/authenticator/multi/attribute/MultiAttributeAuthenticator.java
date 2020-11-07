@@ -1,6 +1,5 @@
 package org.wso2.sample.authenticator.multi.attribute;
 
-import org.wso2.sample.authenticator.multi.attribute.internal.MAAServiceComponent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
@@ -17,12 +16,16 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.sample.authenticator.multi.attribute.internal.MAAServiceComponent;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
-import java.util.HashMap;
 
+/**
+ * Custom Basic Authenticator for multi-attribute authentication.
+ */
 public class MultiAttributeAuthenticator extends BasicAuthenticator {
 
     private static final Log log = LogFactory.getLog(MultiAttributeAuthenticator.class);
@@ -60,7 +63,8 @@ public class MultiAttributeAuthenticator extends BasicAuthenticator {
             if (userRealm != null) {
                 userStoreManager = (UserStoreManager) userRealm.getUserStoreManager();
 
-                internalUsername = MultiAttributeAuthenticatorUtil.getUsernameFromIdentifier(username, userStoreManager);
+                internalUsername = MultiAttributeAuthenticatorUtil.getUsernameFromIdentifier(username,
+                        userStoreManager);
                 isAuthenticated = userStoreManager.
                         authenticate(MultitenantUtils.getTenantAwareUsername(internalUsername), password);
             } else {
