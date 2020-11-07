@@ -7,8 +7,11 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -67,7 +70,15 @@ public class MultiAttributeAuthenticatorUtil {
 
         if (userList == null || userList.length == 0) {
             String errorMessage = "No user found with the provided " + claimUri + ": " + claimValue;
-            log.error(errorMessage);
+            if (log.isDebugEnabled()) {
+                log.debug(errorMessage);
+            }
+            if (isAuthPolicyAccountExistCheck()) {
+                IdentityErrorMsgContext identityErrorMsgContext = new IdentityErrorMsgContext(UserCoreConstants
+                        .ErrorCode.USER_DOES_NOT_EXIST);
+                IdentityUtil.setIdentityErrorMsg(identityErrorMsgContext);
+            }
+
             throw new AuthenticationFailedException(errorMessage);
         } else if (userList.length == 1) {
             if (log.isDebugEnabled()) {
@@ -178,5 +189,10 @@ public class MultiAttributeAuthenticatorUtil {
         }
     }
 
+    private static boolean isAuthPolicyAccountExistCheck() {
+
+        return Boolean.parseBoolean(IdentityUtil.getProperty(
+                MultiAttributeAuthenticatorConstants.POLICY_CHECK_ACCOUNT_EXISTS));
+    }
 
 }

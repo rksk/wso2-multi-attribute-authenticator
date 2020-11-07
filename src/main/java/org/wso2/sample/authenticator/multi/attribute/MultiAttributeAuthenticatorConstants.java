@@ -13,4 +13,6 @@ public class MultiAttributeAuthenticatorConstants {
     public static final String CLAIM_URI_PARAM_STARTS_WITH = "claimuri_";
     public static final String CLAIM_REGEX_PARAM_STARTS_WITH = "claimregex_";
 
+    public static final String POLICY_CHECK_ACCOUNT_EXISTS = "AuthenticationPolicy.CheckAccountExist";
+
 }
