@@ -34,7 +34,7 @@ org.wso2.sample.authenticator.multi.attribute-1.0.0.jar
         [user_store.properties]
         UsernameWithEmailJavaScriptRegEx= "[a-zA-Z0-9._\\-|//]{3,30}$"
         ```
-    * Add following block inside the `<web-app` tag of <IS_HOME>/repository/deployment/server/webapps/authenticationendpoint/WEB-INF/web.xml and <IS_HOME>/repository/deployment/server/webapps/accountrecoveryendpoint/WEB-INF/web.xml (This is not applicable for 5.9.0)
+    * Add following block inside the `<web-app` tag of <IS_HOME>/repository/deployment/server/webapps/authenticationendpoint/WEB-INF/web.xml (This is not applicable for 5.10.0 and later versions only )
         ```
         <context-param>
             <param-name>EnableEmailUserName</param-name>
