@@ -1,5 +1,6 @@
 package org.wso2.sample.authenticator.multi.attribute;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
@@ -14,15 +15,22 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.config.UserStorePreferenceOrderSupplier;
+import org.wso2.carbon.user.core.model.UserMgtContext;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.sample.authenticator.multi.attribute.internal.MAAServiceComponent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_REGEX_PARAM_STARTS_WITH;
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_URI_PARAM_STARTS_WITH;
@@ -60,6 +68,7 @@ public class MultiAttributeAuthenticatorUtil {
         String[] userList;
         String tenantDomain = MultitenantUtils.getTenantDomain(claimValue);
         String tenantAwareClaim = MultitenantUtils.getTenantAwareUsername(claimValue);
+        List<String> userStorePreferenceOrder = new ArrayList<>();
 
         if (log.isDebugEnabled()) {
             log.debug("Searching for a user with " + claimUri + ": " + tenantAwareClaim + " and tenant domain: "
@@ -67,6 +76,24 @@ public class MultiAttributeAuthenticatorUtil {
         }
         userList = userStoreManager.getUserList(claimUri, tenantAwareClaim,
                 MultiAttributeAuthenticatorConstants.DEFAULT_PROFILE);
+
+        if (userList != null && userList.length != 0 && isUserStorePreferenceOrderSet(userStorePreferenceOrder)) {
+            if (log.isDebugEnabled()) {
+                log.debug("User Store Preference Order is Set");
+            }
+            for (String domainName : userStorePreferenceOrder) {
+                String[] filteredList;
+                filteredList = Stream.of(userList).filter(str -> getDomainNameByUserIdentifier(str)
+                        .equalsIgnoreCase(domainName)).collect(Collectors.toList()).toArray(new String[0]);
+                if (filteredList.length >= 1) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Filtered users in domain : " + domainName + " : " + Arrays.toString(filteredList));
+                    }
+                    userList = filteredList;
+                    break;
+                }
+            }
+        }
 
         if (userList == null || userList.length == 0) {
             String errorMessage = "No user found with the provided " + claimUri + ": " + claimValue;
@@ -93,6 +120,36 @@ public class MultiAttributeAuthenticatorUtil {
         throw new AuthenticationFailedException(errorMessage);
     }
 
+    private static boolean isUserStorePreferenceOrderSet(List<String> userStorePreferenceOrder)
+            throws UserStoreException {
+
+        UserMgtContext userMgtContext = UserCoreUtil.getUserMgtContextFromThreadLocal();
+
+        if (userMgtContext != null) {
+            // Retrieve the relevant supplier to generate the user store preference order.
+            UserStorePreferenceOrderSupplier<List<String>> userStorePreferenceSupplier = userMgtContext.
+                    getUserStorePreferenceOrderSupplier();
+            if (userStorePreferenceSupplier != null) {
+                // Generate the user store preference order.
+                List<String> order = userStorePreferenceSupplier.get();
+                if (order != null) {
+                    userStorePreferenceOrder.addAll(order);
+                }
+            }
+        }
+
+        return CollectionUtils.isNotEmpty(userStorePreferenceOrder);
+    }
+
+    private static String getDomainNameByUserIdentifier(String userIdentifier) {
+
+        if (userIdentifier.indexOf("/") > 0) {
+            String[] subjectIdentifierSplits = userIdentifier.split("/", 2);
+            return subjectIdentifierSplits[0];
+        } else {
+            return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+        }
+    }
 
     private static String findIdentifier(String identifier) {
 

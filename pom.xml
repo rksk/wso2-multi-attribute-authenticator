@@ -16,11 +16,6 @@
             <version>${identity.framework.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
-            <version>${user.core.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.user.profile</artifactId>
             <version>${identity.framework.version}</version>
@@ -59,9 +54,9 @@
     </dependencies>
 
     <properties>
-        <identity.framework.version>5.12.181</identity.framework.version>
-        <identity.basicauth.version>6.0.8</identity.basicauth.version>
-        <user.core.version>4.4.40</user.core.version>
+        <identity.framework.version>5.14.97</identity.framework.version>
+        <identity.basicauth.version>6.2.4</identity.basicauth.version>
+        <user.core.version>4.5.1</user.core.version>
     </properties>
 
     <build>
@@ -70,7 +65,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.5</version>
+                    <version>3.2.0</version>
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
