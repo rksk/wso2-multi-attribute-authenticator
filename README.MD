@@ -3,6 +3,8 @@
 This component was developed to allow users to use a user attribute (eg: email, phone number) as username when logging in
  with basic authentication instead of the immutable username which [WSO2 Identity Server](https://wso2.com/identity-and-access-management/) has by default. Read more at [this blog post](https://medium.com/@sajithekanayaka/solved-multiple-login-identifiers-for-wso2-identity-server-78005599d97e).
  
+Note: This will be included OOTB in the upcoming WSO2 IS 5.12.0 release and also in the 5.10.0 & 5.11.0 version as an update (updates are available only for subscription customers of WSO2). More info on the OOTB feature can be found from [the documentation](https://is.docs.wso2.com/en/5.12.0/learn/multi-attribute-login/) and [this blog](https://chathurangapriyadarshana.medium.com/multi-attribute-login-wso2-identity-server-867a9ee60ce1).
+ 
  This component has been tested with WSO2 IS versions from 5.5.0 to 5.10.0.
  
  If you are working with WSO2 IS version 5.5.0, 5.6.0, 5.7.0 or 5.8.0, please find the documentation [here](README-5.8.0-and-old.MD). The following stpes are for 5.9.0.
