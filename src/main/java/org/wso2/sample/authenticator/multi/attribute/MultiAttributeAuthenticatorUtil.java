@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_REGEX_PARAM_STARTS_WITH;
 import static org.wso2.sample.authenticator.multi.attribute.MultiAttributeAuthenticatorConstants.CLAIM_URI_PARAM_STARTS_WITH;
@@ -57,6 +55,14 @@ public class MultiAttributeAuthenticatorUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Found identifier type for " + identifier + ": " + identifierClaim);
             }
+            List<String> userStorePreferenceOrder = new ArrayList<>();
+            if (isUserStorePreferenceOrderSet(userStorePreferenceOrder)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User Store Preference Order is Set");
+                }
+               return getUsernameFromClaimUsingPreferenceOrder(identifierClaim, identifier, userStoreManager,
+                       userStorePreferenceOrder);
+            }
             return getUsernameFromClaim(identifierClaim, identifier, userStoreManager);
         }
     }
@@ -68,7 +74,6 @@ public class MultiAttributeAuthenticatorUtil {
         String[] userList;
         String tenantDomain = MultitenantUtils.getTenantDomain(claimValue);
         String tenantAwareClaim = MultitenantUtils.getTenantAwareUsername(claimValue);
-        List<String> userStorePreferenceOrder = new ArrayList<>();
 
         if (log.isDebugEnabled()) {
             log.debug("Searching for a user with " + claimUri + ": " + tenantAwareClaim + " and tenant domain: "
@@ -76,24 +81,6 @@ public class MultiAttributeAuthenticatorUtil {
         }
         userList = userStoreManager.getUserList(claimUri, tenantAwareClaim,
                 MultiAttributeAuthenticatorConstants.DEFAULT_PROFILE);
-
-        if (userList != null && userList.length != 0 && isUserStorePreferenceOrderSet(userStorePreferenceOrder)) {
-            if (log.isDebugEnabled()) {
-                log.debug("User Store Preference Order is Set");
-            }
-            for (String domainName : userStorePreferenceOrder) {
-                String[] filteredList;
-                filteredList = Stream.of(userList).filter(str -> getDomainNameByUserIdentifier(str)
-                        .equalsIgnoreCase(domainName)).collect(Collectors.toList()).toArray(new String[0]);
-                if (filteredList.length >= 1) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Filtered users in domain : " + domainName + " : " + Arrays.toString(filteredList));
-                    }
-                    userList = filteredList;
-                    break;
-                }
-            }
-        }
 
         if (userList == null || userList.length == 0) {
             String errorMessage = "No user found with the provided " + claimUri + ": " + claimValue;
@@ -120,6 +107,52 @@ public class MultiAttributeAuthenticatorUtil {
         throw new AuthenticationFailedException(errorMessage);
     }
 
+    private static String getUsernameFromClaimUsingPreferenceOrder(String claimUri, String claimValue,
+                                                                   UserStoreManager userStoreManager,
+                                                                   List<String> userStorePreferenceOrder)
+            throws UserStoreException, AuthenticationFailedException {
+
+        String[] userList;
+        String tenantDomain = MultitenantUtils.getTenantDomain(claimValue);
+        String tenantAwareClaim = MultitenantUtils.getTenantAwareUsername(claimValue);
+
+        for (String domainName : userStorePreferenceOrder) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Searching for a user with " + claimUri + ": " + tenantAwareClaim + " and tenant domain: "
+                        + tenantDomain + " in user store domain: " + domainName);
+            }
+
+            userList = userStoreManager.getUserList(claimUri, domainName + "/" + tenantAwareClaim,
+                    MultiAttributeAuthenticatorConstants.DEFAULT_PROFILE);
+
+            if (userList.length == 1) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found single user " + userList[0] + " with the " + claimUri + ": " + claimValue
+                            + " in user store domain: " + domainName);
+                }
+                return userList[0] + "@" + tenantDomain;
+            } else if (userList.length > 1) {
+                String errorMessage = "Multiple users found with the same claim(" + claimUri + ") value " +
+                        claimValue + ": " + Arrays.toString(userList) + " in userstore domain: " + domainName;
+                log.error(errorMessage);
+                throw new AuthenticationFailedException(errorMessage);
+            }
+        }
+
+        String errorMessage = "No user found with the provided " + claimUri + ": " + claimValue;
+        if (log.isDebugEnabled()) {
+            log.debug(errorMessage);
+        }
+        if (isAuthPolicyAccountExistCheck()) {
+            IdentityErrorMsgContext identityErrorMsgContext = new IdentityErrorMsgContext(UserCoreConstants
+                    .ErrorCode.USER_DOES_NOT_EXIST);
+            IdentityUtil.setIdentityErrorMsg(identityErrorMsgContext);
+        }
+
+        throw new AuthenticationFailedException(errorMessage);
+    }
+
     private static boolean isUserStorePreferenceOrderSet(List<String> userStorePreferenceOrder)
             throws UserStoreException {
 
@@ -139,16 +172,6 @@ public class MultiAttributeAuthenticatorUtil {
         }
 
         return CollectionUtils.isNotEmpty(userStorePreferenceOrder);
-    }
-
-    private static String getDomainNameByUserIdentifier(String userIdentifier) {
-
-        if (userIdentifier.indexOf("/") > 0) {
-            String[] subjectIdentifierSplits = userIdentifier.split("/", 2);
-            return subjectIdentifierSplits[0];
-        } else {
-            return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
-        }
     }
 
     private static String findIdentifier(String identifier) {
